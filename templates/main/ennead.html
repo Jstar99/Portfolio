@@ -1,0 +1,399 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Project Ennead {% endblock %}
+
+{% block content %}
+<h1>Project Ennead</h1>
+<div class="vid" style="margin-left: 20%;">
+    <iframe width="640" height="400" src="https://www.youtube.com/embed/4L0vZTVqMuA" title="Project Ennead" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+<section>
+    <p>
+        Project Ennead is a project made by a small group of individuals where I was responsible for all the programming, for the DreamDust expo, it is a deckbuilding, dungeon crawling RPG game.
+        For more info on the project: <a href="https://dreamdustexpo.com/project/project-ennead/">Play the Game</a> 
+    </p>
+    <p> Made with: <b>Unity Engine</b></p>
+    <p>Languages:<b>C#</b></p>
+    <p>Other:<b>Git//Github</b></p>
+</section>
+
+<section>
+    <h2>Example Code</h2>
+    <div>
+        <header style="margin-left: 40%;"><B>Player Health and Mana Class</B></header>
+        <div class="hp" style="background-color: darkslategrey; color: white; width: 900px; margin-left: 15%;"  >
+            <pre class="line-numbers">
+                <code class="language-c#" >
+                using System.Collections;
+                using System.Collections.Generic;
+                using UnityEngine.UI;
+                using UnityEngine;
+                using UnityEngine.SceneManagement;
+                
+                public class HealthAndMana : MonoBehaviour
+                {
+                    public CheckPointManager cpManager;
+                    public Image HealthUI;
+                    float lerpSpeed;
+                    public GameObject restart;
+                    public int currentSceneNum;
+                    public float curHp;
+                    public float maxHp;
+                    public Text curHpTxt;
+                    public Text maxHpTxt;
+                    public Image[] manaCrystal;
+                    public Sprite emptyManaSlot;
+                    public Sprite fullManaSlot;
+                    public BattleManager bManager;
+                    public Text manaTxt;
+                    public int curMana;
+                    public Sprite[] manaCostArray;
+                    public GameObject movepoint;
+                    private float deathTime;
+                    private PlayerBattleController player;
+                    public PlayerHand pHand;
+                
+                
+                
+                    // Start is called before the first frame update
+                    void Start()
+                    {
+                        curMana = 1;
+                        curHp = maxHp;  
+                        restart.SetActive(false);
+                        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerBattleController>();
+                        player.transform.position = new Vector2(cpManager.curPlayerPos.x, cpManager.curPlayerPos.y);
+                    }
+                
+                    // Update is called once per frame
+                    void Update()
+                    {   
+                        HealthSystem();
+                        ManaSystem();
+                        KillPlayer();
+                        if(curMana > 10)
+                            curMana = 10;
+                
+                        lerpSpeed = 10f * Time.deltaTime;
+                    }
+                    void HealthSystem()
+                    {
+                        HealthUI.fillAmount = Mathf.Lerp(HealthUI.fillAmount, curHp / maxHp, lerpSpeed);        
+                
+                        if(curHp <= 0)
+                            curHp = 0;
+                        
+                        if(curHp > 500)
+                            curHp = 500;
+                    }
+                
+                    void ManaSystem()
+                    {
+                        manaTxt.text = curMana.ToString();
+                
+                        // Loops through your mana crystals and displays whether or not you have mana
+                        for (int i = 0; i < manaCrystal.Length; i++)
+                        {
+                            if(i < curMana)
+                            {
+                                manaCrystal[i].sprite = fullManaSlot;
+                            }
+                            else
+                            {
+                                manaCrystal[i].sprite = emptyManaSlot;
+                            }
+                        }
+                    }
+                
+                    void KillPlayer()
+                    {
+                       
+                        if(curHp <= 0)
+                        {
+                            deathTime += Time.deltaTime;
+                            GetComponent<Animator>().Play("Player_Death");
+                            movepoint.GetComponent<PlayerMovePoint>().moveSpeed = 0;
+                           
+                            player.enabled = false;  
+                            pHand.enabled = false;   
+                            restart.SetActive(true);
+                            player.rb.velocity = new Vector2(0f, 0f);
+                        }
+                        else 
+                        {
+                            GetComponent<Animator>().SetBool("die", false);
+                      
+                            player.enabled = true;  
+                            pHand.enabled = true;   
+                            restart.SetActive(false);
+                        }
+                    }
+                
+                    public void RetryLevel()
+                    {
+                        SceneManager.LoadScene(currentSceneNum);
+                    }
+                
+                    public void LoadCheckPoint()
+                    {
+                        SceneManager.LoadScene(currentSceneNum);   
+                    }
+                }
+                
+                    </code>
+                    </pre>
+                
+        </div>
+        <header style="margin-left: 40%;"><B>Player Controller Class</B></header>
+        <div class="hp" style="background-color: darkslategrey; color: white; width: 900px; margin-left: 15%;"  >
+            <pre class="line-numbers">
+                <code class="language-c#" >
+System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class PlayerController : MonoBehaviour
+{
+    public float moveX;
+    public float moveY;
+    private SpriteRenderer rend;
+    private Rigidbody2D rb;
+    public int num;
+    float horizontal;
+    float vertical;
+    float moveLimiter = 0.7f;
+    public float runSpeed = 20.0f;
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        rend = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();    
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        horizontal = Input.GetAxisRaw("Horizontal"); 
+        vertical = Input.GetAxisRaw("Vertical"); 
+
+        if(Input.GetKey(KeyCode.A))
+            rend.flipX = true;
+
+        else if(Input.GetKey(KeyCode.D))
+            rend.flipX = false;
+    }
+
+    void FixedUpdate()
+    {
+        PlayerMovement();
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.gameObject.CompareTag("Enemy"))
+            SceneManager.LoadScene(num);
+        
+    }
+
+    void StopMovement()
+    {
+        rb.velocity = new Vector2(0f, 0f);        
+    }
+
+
+     void PlayerMovement()
+    {
+        if (horizontal != 0 && vertical != 0) 
+        {
+            // limit movement speed diagonally, so you move at 70% speed
+            horizontal *= moveLimiter;
+            vertical *= moveLimiter;
+        } 
+        rb.velocity = new Vector2(horizontal * runSpeed, vertical * runSpeed);
+    }
+}
+
+                </code>
+            </pre>
+        </div>
+        <header style="margin-left: 40%;"><B>Card Display Class</B></header>
+        <div class="hp" style="background-color: darkslategrey; color: white; width: 900px; margin-left: 15%;"  >
+            <pre class="line-numbers">
+                <code class="language-c#" >
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CardDisplay : MonoBehaviour
+{
+    Card cardData;
+    public PlayerDeck deckData;
+    public SpriteRenderer rend;
+    public bool on;
+    public BattleManager managerScript;
+    private string whatCard;
+    public int cardCost;
+    public int ranomCardID;
+    public int num;
+
+    public int[] randomHealCards;
+    public int[] randomAtkCards;
+
+    public bool randomCards = true;
+    public bool healCards;
+    public bool attackCards;
+    public DeckManager dm;
+
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        switch(dm.deckNum)
+        {
+            case 1:
+                attackCards = true;
+                healCards = false;
+                randomCards = false;
+            break;
+
+            case 2:
+                attackCards = false;
+                healCards = true;
+                randomCards = false;
+            break;
+
+            case 3:
+                attackCards = false;
+                healCards = false;
+                randomCards = true;
+            break;
+        }
+
+        rend = GetComponent<SpriteRenderer>();
+
+        if(randomCards && !dm.godSummonUnlocked)
+            ranomCardID = Random.Range(0, 7);
+
+        else if(randomCards && dm.godSummonUnlocked)
+            ranomCardID = Random.Range(0, 8);
+        
+        else if(healCards)
+            HealCards();
+        
+        else if(attackCards)
+            AttackCards();
+            
+        rend.sprite = managerScript.CardList[ranomCardID].cardImage;
+        cardCost = managerScript.CardList[ranomCardID].manaCost;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        switch(dm.deckNum)
+        {
+            case 1:
+                attackCards = true;
+                healCards = false;
+                randomCards = false;
+            break;
+
+            case 2:
+                attackCards = false;
+                healCards = true;
+                randomCards = false;
+            break;
+
+            case 3:
+                attackCards = false;
+                healCards = false;
+                randomCards = true;
+            break;
+        }
+        //ranomCardID = 6;
+        if(managerScript.timeToShuffle)
+        {
+            Shuffle();
+        }
+    }
+    void OnEnable()
+    {
+        //rend = GetComponent<SpriteRenderer>();
+        on = true;
+        cardCost = managerScript.CardList[ranomCardID].manaCost;
+        Shuffle();
+        
+    }
+
+    void OnDisable()
+    {
+        on = false;
+    }
+
+    void Shuffle()
+    {
+        rend = GetComponent<SpriteRenderer>();
+
+        if(randomCards && !dm.godSummonUnlocked)
+            ranomCardID = Random.Range(0, 7);
+        else if(randomCards && dm.godSummonUnlocked)
+            ranomCardID = Random.Range(0, 8);
+        else if(healCards)
+            HealCards();
+         else if(attackCards)
+            AttackCards();
+
+        rend.sprite = managerScript.CardList[ranomCardID].cardImage;
+        cardCost = managerScript.CardList[ranomCardID].manaCost;
+    }
+
+    void HealCards()
+    {
+       if(dm.godSummonUnlocked)
+        {
+            randomHealCards[1] = 7;
+        }
+        else if(!dm.godSummonUnlocked)
+        {
+            randomHealCards[1] = 1;
+        }
+
+       num = Random.Range(0, 6);
+       ranomCardID = randomHealCards[num];
+    }
+
+    void AttackCards()
+    {
+        if(dm.godSummonUnlocked)
+        {
+            randomAtkCards[2] = 7;
+        }
+        else if(!dm.godSummonUnlocked)
+        {
+            randomAtkCards[2] = 0;
+        }
+        
+       num = Random.Range(0, 6);
+       ranomCardID = randomAtkCards[num];
+    }
+}
+                </code>
+            </pre>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+
+
+
+<!-- <div class="hp" style="background-color: darkslategrey; color: white; width: 900px; margin-left: 15%;"  >
+    <pre class="line-numbers">
+        <code class="language-c#" >
+        </code>
+    </pre>
+</div> -->

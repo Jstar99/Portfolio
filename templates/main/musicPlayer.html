@@ -1,0 +1,84 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Music Player {% endblock %}
+
+
+{% block content %}
+<h1>Music Player App</h1>
+<section>
+    <img src="https://media.discordapp.net/attachments/1074470485271777442/1074864301778665582/image.png" alt="">
+    <p>
+        A windows form application for a Music player, able to play music and audio files from your local machine
+    </p>
+    <p> Made with: <b>Microsoft Visual Studio</b></p>
+    <p>Languages:<b>C#</b></p>
+    <p>Other:<b>Windows Form</b></p>
+</section>
+
+<section>
+    <h2>Example Code</h2>
+    <div>
+        <header style="margin-left: 40%;"><B>Media Player Class</B></header>
+        <div class="hp" style="background-color: rgb(31, 33, 61); color: white; width: 900px; margin-left: 15%;"  >
+            <pre class="line-numbers">
+                <code class="language-python">
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace MusicApp2
+{
+    public partial class form1 : Form
+    {
+        // Create global variables of string type array to save the titles or names of the tracks and thier paths
+        String[] paths, files;
+        
+
+        private void BtnSelectSong_Click(object sender, EventArgs e)
+        {
+            // Code to select songs
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            if(ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                files = ofd.SafeFileNames; // Saves the name of the track in file array 
+                paths = ofd.FileNames;  // Saves the paths of the tracks in path array
+
+                ofd.Multiselect = true; // select multiple tracks
+
+                for(int i = 0; i < files.Length; i++)
+                {
+                    listBoxSongs.Items.Add(files[i]); // Displays the song
+                }
+            }
+        }
+
+        public form1()
+        {
+            InitializeComponent();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            // Close App
+            this.Close();
+        }
+
+        private void listBoxSongs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Plays song
+            axWindowsMediaPlayer1.URL = paths[listBoxSongs.SelectedIndex];
+        }
+    }
+}
+                </code>
+            </pre>
+        </div>
+</section>
+{% endblock %}

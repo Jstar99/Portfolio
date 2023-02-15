@@ -1,0 +1,148 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Discord Bot {% endblock %}
+
+
+{% block content %}
+<h1>Discord Bot</h1>
+<img  class="col-md-4 mb-4" src="https://media.discordapp.net/attachments/1074470485271777442/1074508700691214376/image.png" height="">
+<img  class="col-md-4 mb-4" src="https://media.discordapp.net/attachments/1074470485271777442/1074508814449135616/3.png">
+<img  class="col-md-4 mb-4" src="https://media.discordapp.net/attachments/1074470485271777442/1074508868736008222/unknown_2.png" alt="">
+
+<section>
+    <p>
+        This is  bot created for the social media webapp Discord, it has the ability to: Respond to simple messages, Display scrapped data from the video game league of legends and play music from youtube  
+    </p>
+    <p> Made with: <b>Visual Studio Code</b></p>
+    <p>Languages:<b>Python</b></p>
+    <p>Other:<b>Asychronous Programming</b></p>
+</section>
+
+<section>
+    <h2>Example Code</h2>
+    <div>
+        <header style="margin-left: 40%;"><B>Main Class</B></header>
+        <div class="hp" style="background-color: rgb(31, 33, 61); color: white; width: 900px; margin-left: 15%;"  >
+            <pre class="line-numbers">
+                <code class="language-python" >
+                    
+from ast import If
+from asyncio.windows_events import NULL
+from dis import disco
+import discord
+import random
+from discord.ext import commands
+from riotwatcher import LolWatcher
+
+
+TOKEN = ''
+intents = discord.Intents.default()
+intents.message_content = True
+intents.typing = False
+intents.presences = False
+
+client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='-', intents=intents)
+greetings = ['Hi :) ', 'Hola ', 'Hallo ', 'Bonjour ', 'Wah gwan ', ' 안녕하세요 ', ' مرحبا ', ' こんにちは ']
+tb = 1000
+
+
+riotApiKey = ""
+watcher = LolWatcher(riotApiKey)
+platformRoutingValue = "NA1"
+summonerName = "CDKR"
+
+#print(summoner)
+
+@bot.command()
+async def summoner(ctx, sum):
+    _summoner = watcher.summoner.by_name(platformRoutingValue,sum)
+  #  sLevel = _summoner['summonerLevel']
+    sLevel = _summoner['puuid']
+    sName = _summoner['name']
+    colorOne = random.randint(0, 255)
+    colorTwo = random.randint(0, 255)
+    colorThree = random.randint(0, 255) 
+    summonerProfile = discord.Embed(title = sName + "'s Account",description=f"Account Level= {sLevel} ",color = discord.Colour.from_rgb(colorOne, colorTwo, colorThree), type="rich") 
+    await ctx.send(embed=summonerProfile)
+
+@bot.command()
+async def MD(ctx, user):
+    matchID = watcher._match.matchlist_by_puuid(platformRoutingValue, _summoner["puuid"],0,1,)
+    match = watcher.match(platformRoutingValue, matchID) 
+    pass
+
+@bot.command()
+async def hello(ctx):
+    await ctx.send(greetings[random.randrange(0,8,1)] + str(ctx.message.author.display_name))
+    
+@bot.command()
+async def join(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
+
+@bot.command()
+async def leave(ctx):
+    await ctx.voice_client.disconnect()
+
+@bot.command()
+async def profile(ctx):
+    colorOne = random.randint(0, 255)
+    colorTwo = random.randint(0, 255)
+    colorThree = random.randint(0, 255) 
+    userProfile = discord.Embed(title = str(ctx.message.author.display_name) + "'s Profile",description=f"Toaster Bucks = {tb}",color = discord.Colour.from_rgb(colorOne, colorTwo, colorThree), type="rich") 
+    await ctx.send(embed=userProfile)
+      
+
+bot.run(TOKEN)
+                </code>
+            </pre>
+        </div>
+        <header style="margin-left: 40%;"><B>Youtube Class</B></header>
+        <div class="hp" style="background-color: rgb(31, 33, 61); color: white; width: 900px; margin-left: 15%;"  >
+            <pre class="line-numbers">
+                <code class="language-c#">
+                    import discord
+import asyncio
+import youtube_dl
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print(f'{client.user} has connected to Discord!')
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.startswith('!play'):
+        song_url = message.content.split(" ")[1]
+
+        voice_channel = message.author.voice.channel
+        voice_client = await voice_channel.connect()
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([song_url])
+
+        voice_client.play(discord.FFmpegPCMAudio('song.mp3'))
+        voice_client.is_playing()
+
+client.run('')
+
+                </code>
+            </pre>
+        </div>
+    </div>
+</section>
+{% endblock %}
